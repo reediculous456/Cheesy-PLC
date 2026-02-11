@@ -1,10 +1,8 @@
 !
-! Configuration for the Allen-Bradley Stratix 8300 Blue SCC
+! Last configuration change at 18:54:30 EST Tue Feb 3 2026
+! NVRAM config last updated at 18:54:30 EST Tue Feb 3 2026
 !
-! Last configuration change at 08:48:21 PST Sat Nov 2 2024 by admin
-! NVRAM config last updated at 08:48:40 PST Sat Nov 2 2024 by admin
-!
-version 15.2
+version 12.2
 no service pad
 service timestamps debug datetime msec
 service timestamps log datetime msec
@@ -20,17 +18,9 @@ enable secret 5 $1$soxk$poRcxf7TdTy4wdR41IQZq1
 !
 username admin privilege 15 secret 5 $1$Ok4L$hPKC.VthI3SxzIKzcux8P.
 no aaa new-model
-clock timezone PST -8 0
-clock summer-time PST recurring 2 Sun Mar 2:00 1 Sun Nov 1:00
-!
-!
+clock timezone EST -5
+clock summer-time EST recurring
 system mtu routing 1500
-!
-! Stratix 8300 note:
-! The 8300 is Layer-3 capable. This config expects L2 behavior using a management SVI
-! plus ip default-gateway, so explicitly disable routing.
-!
-no ip routing
 !
 !
 !
@@ -41,48 +31,64 @@ ip domain-name lakotarobotics.org
 !
 !
 ptp mode e2etransparent
-!
+vtp mode transparent
+udld aggressive
+no ip routing
+no ip dhcp
 !
 spanning-tree mode rapid-pvst
+spanning-tree loopguard default
+spanning-tree portfast bpduguard default
+spanning-tree portfast bpdufilter default
 spanning-tree extend system-id
 !
+alarm profile defaultPort
+ alarm 3
+ syslog 3
+ notifies 3
 !
+alarm profile ab-alarm
+ alarm 1 2 3 4
+ syslog 1 2 3 4
+ notifies 1 2 3 4
+ relay-major 2
+ relay-minor 1 3 4
 !
+alarm facility power-supply notifies
+alarm facility power-supply relay major
+alarm facility temperature secondary notifies
+alarm facility temperature secondary syslog
+alarm facility temperature secondary relay minor
+alarm facility temperature secondary high 90
+alarm facility temperature secondary low 0
 !
 vlan internal allocation policy ascending
 !
+vlan 40,50,60,100
 lldp run
 !
 !
 !
 !
 !
-interface GigabitEthernet1/1
- description Uplink Trunk
- switchport trunk native vlan 100
- switchport mode trunk
-!
-interface GigabitEthernet1/2
- switchport access vlan 100
- switchport mode access
-!
 interface FastEthernet1/1
  description Blue 1 DS
  switchport access vlan 40
  switchport mode access
- spanning-tree portfast
 !
 interface FastEthernet1/2
  description Blue 2 DS
  switchport access vlan 50
  switchport mode access
- spanning-tree portfast
 !
 interface FastEthernet1/3
  description Blue 3 DS
  switchport access vlan 60
  switchport mode access
- spanning-tree portfast
+!
+interface FastEthernet1/4
+ switchport access vlan 100
+ switchport mode access
 !
 interface FastEthernet1/5
  switchport access vlan 100
@@ -98,6 +104,15 @@ interface FastEthernet1/7
 !
 interface FastEthernet1/8
  description Blue ArmorBlock
+ switchport access vlan 100
+ switchport mode access
+!
+interface GigabitEthernet1/1
+ description Uplink Trunk
+ switchport trunk native vlan 100
+ switchport mode trunk
+!
+interface GigabitEthernet1/2
  switchport access vlan 100
  switchport mode access
 !
@@ -119,16 +134,10 @@ interface Vlan60
 interface Vlan100
  description ADMIN
  ip address 10.0.100.49 255.255.255.0
- no shutdown
  cip enable
 !
-ip default-gateway 10.0.100.1
-ip forward-protocol nd
-!
+ip default-gateway 10.0.100.3
 ip http server
-!
-!
-!
 !
 snmp-server community 1234Five RO
 !
