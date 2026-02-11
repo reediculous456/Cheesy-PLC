@@ -1,4 +1,6 @@
 !
+! Configuration for the Allen-Bradley Stratix 8300 Blue SCC!
+!
 ! Last configuration change at 18:54:30 EST Tue Feb 3 2026
 ! NVRAM config last updated at 18:54:30 EST Tue Feb 3 2026
 !
